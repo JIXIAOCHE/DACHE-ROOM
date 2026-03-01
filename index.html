@@ -1,0 +1,1543 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>成功人士都在用的出租屋模拟器</title>
+
+  <style>
+    /* ===== 吉小车 固定视觉规范（严格 4 色） =====
+      主色：#D4A853
+      背景：#F5F5F0
+      文字：#1A1A1A
+      辅助：#888888
+      不使用其他颜色；透明度仅基于以上颜色
+    */
+    :root{
+      --c-primary:#D4A853;
+      --c-bg:#F5F5F0;
+      --c-ink:#1A1A1A;
+      --c-muted:#888888;
+
+      --scale:0.60;
+      --grid:40;
+      --snap:14;
+
+      --line: 1px solid var(--c-muted);
+      --line-soft: 1px dotted var(--c-muted);
+
+      --r:8px;
+      --pad:12px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background:var(--c-bg);
+      color:var(--c-ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    .app{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:12px;
+      padding:12px;
+      height:100%;
+    }
+
+    /* ===== 左侧：极简控制台 ===== */
+    .panel{
+      border:var(--line);
+      border-radius:var(--r);
+      padding:12px;
+      background:transparent;
+      overflow:auto;
+    }
+
+    .brand{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      padding-bottom:10px;
+      border-bottom:var(--line-soft);
+      margin-bottom:10px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:16px;
+      font-weight:900;
+      line-height:1.25;
+      letter-spacing:.2px;
+    }
+    .pill{
+      font-family:var(--mono);
+      font-size:12px;
+      font-weight:800;
+      border:var(--line);
+      border-radius:var(--r);
+      padding:6px 8px;
+      white-space:nowrap;
+    }
+
+    .topActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin:10px 0 12px;
+    }
+
+    .btn{
+      border:var(--line);
+      border-radius:var(--r);
+      padding:8px 10px;
+      background:transparent;
+      color:var(--c-ink);
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+      line-height:1;
+    }
+    .btn.primary{
+      background:var(--c-primary);
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .acc{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    details{
+      border:var(--line);
+      border-radius:var(--r);
+      background:transparent;
+      overflow:hidden;
+    }
+    summary{
+      list-style:none;
+      cursor:pointer;
+      padding:10px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      user-select:none;
+    }
+    summary::-webkit-details-marker{ display:none; }
+
+    .sumLeft{
+      min-width:0;
+      display:flex;
+      align-items:baseline;
+      gap:8px;
+    }
+    .sumTitle{
+      font-size:14px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .sumMeta{
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--c-muted);
+      font-weight:800;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      min-width:0;
+    }
+    .chev{
+      width:28px;
+      height:28px;
+      border:var(--line);
+      border-radius:var(--r);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:var(--mono);
+      font-weight:900;
+      color:var(--c-muted);
+      flex:0 0 auto;
+    }
+    details[open] .chev{ color:var(--c-ink); }
+
+    .box{
+      padding:10px;
+      border-top:var(--line-soft);
+    }
+
+    .pxDivider{
+      margin:10px 0;
+      height:10px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          var(--c-muted) 0px,
+          var(--c-muted) 2px,
+          transparent 2px,
+          transparent 6px
+        );
+      opacity:1;
+    }
+
+    label{
+      display:block;
+      font-size:11px;
+      font-weight:800;
+      color:var(--c-muted);
+      margin-bottom:6px;
+    }
+
+    input, select{
+      width:100%;
+      border:var(--line);
+      border-radius:var(--r);
+      padding:8px 10px;
+      background:transparent;
+      color:var(--c-ink);
+      font-size:14px;
+      outline:none;
+    }
+    input:focus, select:focus{ box-shadow: 0 0 0 2px var(--c-primary); }
+
+    .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    .row3{ display:grid; grid-template-columns: 1.2fr 1fr 1fr; gap:8px; }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:10px;
+    }
+    .li{
+      border:var(--line);
+      border-radius:var(--r);
+      padding:8px 10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .li .name{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-weight:900;
+      font-size:12px;
+    }
+    .li .meta{
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--c-muted);
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .ops{ display:flex; gap:8px; flex-wrap:wrap; }
+    .mini{
+      border:var(--line);
+      border-radius:var(--r);
+      padding:6px 8px;
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+      background:transparent;
+      line-height:1;
+    }
+    .mono{ font-family:var(--mono); }
+
+    /* ===== 右侧画布 ===== */
+    .stage{
+      border:var(--line);
+      border-radius:var(--r);
+      padding:12px;
+      background:transparent;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .stageTop{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:10px;
+      padding-bottom:10px;
+      border-bottom:var(--line-soft);
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+    .stageTop .v{
+      font-family:var(--mono);
+      font-size:12px;
+      font-weight:900;
+      color:var(--c-ink);
+    }
+
+    .canvas{
+      position:relative;
+      height: calc(100vh - 110px);
+      min-height:560px;
+      border:var(--line);
+      border-radius:var(--r);
+      background:
+  linear-gradient(to right, rgba(136,136,136,0.25) 1px, transparent 1px) 0 0 / calc(var(--grid) * 1px) calc(var(--grid) * 1px),
+  linear-gradient(to bottom, rgba(136,136,136,0.25) 1px, transparent 1px) 0 0 / calc(var(--grid) * 1px) calc(var(--grid) * 1px);
+      overflow:auto;
+      padding:12px;
+    }
+
+    .compare{
+      display:flex;
+      gap:18px;
+      align-items:flex-start;
+      min-width:max-content;
+      min-height:max-content;
+    }
+
+    .roomWrap{ display:flex; flex-direction:column; gap:10px; flex:0 0 auto; }
+    .roomTag{ display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; }
+    .roomTag .t{
+      border:var(--line);
+      border-radius:var(--r);
+      padding:6px 8px;
+      font-weight:900;
+      font-size:12px;
+      background:var(--c-primary);
+    }
+    .roomTag .s{
+      border:var(--line);
+      border-radius:var(--r);
+      padding:6px 8px;
+      font-family:var(--mono);
+      font-weight:900;
+      font-size:12px;
+      color:var(--c-muted);
+    }
+
+    .room{
+  position:relative;
+  border:2px solid var(--c-ink);
+  border-radius:var(--r);
+  background:transparent;
+}
+
+    /* ===== 关键：画布物体填充（只用4色+透明度） ===== */
+    .item, .opening, .avatar{
+      position:absolute;
+      border:2px solid var(--c-ink);
+      border-radius:var(--r);
+      cursor:grab;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      line-height:1.15;
+      font-weight:900;
+      color:var(--c-ink);
+      padding:6px;
+      background: rgba(212,168,83,0.18); /* 主色轻填充 */
+    }
+    .opening{
+      border-color: var(--c-muted);
+      background: rgba(136,136,136,0.12); /* 辅助色轻填充 */
+      border-radius:6px;
+      padding:4px 6px;
+      font-size:12px;
+    }
+    .avatar{
+      border-radius:999px;
+      border-color: var(--c-primary);
+      background: rgba(212,168,83,0.08); /* 很淡的主色填充 */
+      padding:0;
+      font-size:12px;
+    }
+
+    .item.dragging, .opening.dragging, .avatar.dragging{
+      outline:2px solid var(--c-primary);
+      outline-offset:2px;
+      cursor:grabbing;
+    }
+    .selected{
+      outline:2px solid var(--c-primary);
+      outline-offset:2px;
+    }
+.hidden{ display:none !important; }
+  </style>
+
+<style>
+/* Hide old signature elements if present */
+.brandLogo,
+.signature,
+.footerBrand{
+  display:none !important;
+}
+
+.brandText{
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #1A1A1A;
+  opacity: 0.85;
+  user-select: none;
+  white-space: nowrap;
+}
+</style>
+
+</head>
+
+<body>
+<div class="app">
+  <!-- LEFT -->
+  <aside class="panel">
+    <div class="brand">
+      <div>
+        <h1>成功人士都在用的出租屋模拟器</h1>
+      </div>
+      <div class="pill" id="countPill">0</div>
+    </div>
+
+    <div class="topActions">
+      <button class="btn primary" id="exportCompare">导出</button>
+      <button class="btn" id="fitScale">适配</button>
+      <button class="btn" id="restoreRooms">恢复</button>
+    </div>
+
+    <div class="acc">
+
+      <!-- GLOBAL -->
+      <details open>
+        <summary>
+          <div class="sumLeft">
+            <div class="sumTitle">全局</div>
+            <div class="sumMeta" id="globalMeta">scale=0.60 · snap=14 · grid=40</div>
+          </div>
+          <div class="chev">›</div>
+        </summary>
+        <div class="box">
+          <div class="row3">
+            <div>
+              <label>缩放 <span class="mono">(1cm→px)</span></label>
+              <input id="scale" type="number" step="0.05" min="0.2" max="2" value="0.6" />
+            </div>
+            <div>
+              <label>吸附 <span class="mono">(px)</span></label>
+              <input id="snap" type="number" step="1" min="0" max="60" value="14" />
+            </div>
+            <div>
+              <label>网格 <span class="mono">(px)</span></label>
+              <input id="grid" type="number" step="5" min="20" max="80" value="40" />
+            </div>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn primary" id="applyGlobal">应用</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- ROOM A -->
+      <details open>
+        <summary>
+          <div class="sumLeft">
+            <div class="sumTitle">房间1</div>
+            <div class="sumMeta" id="subA">-</div>
+          </div>
+          <div class="chev">›</div>
+        </summary>
+        <div class="box">
+          <div class="row2">
+            <div>
+              <label>命名</label>
+              <input id="nameA" value="方案 A" />
+            </div>
+            <div>
+              <label>宽 <span class="mono">(cm)</span></label>
+              <input id="wA" type="number" value="700" min="100" />
+            </div>
+          </div>
+          <div class="row2" style="margin-top:8px;">
+            <div>
+              <label>长 <span class="mono">(cm)</span></label>
+              <input id="lA" type="number" value="700" min="100" />
+            </div>
+            <div style="display:flex; gap:8px; align-items:end;">
+              <button class="btn primary" id="applyA" style="width:100%;">应用</button>
+            </div>
+          </div>
+
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn" id="exportA">导出</button>
+            <button class="btn" id="removeA">隐藏</button>
+            <button class="btn" id="resetA">重置</button>
+          </div>
+
+          <div class="pxDivider"></div>
+
+          <!-- Openings -->
+          <div class="row3">
+            <div>
+              <label>门窗命名</label>
+              <input id="openNameA" value="入户门" />
+            </div>
+            <div>
+              <label>类型</label>
+              <select id="openTypeA">
+                <option value="door">门</option>
+                <option value="window">窗</option>
+              </select>
+            </div>
+            <div>
+              <label>长度 <span class="mono">(cm)</span></label>
+              <input id="openLenA" type="number" value="90" min="30" max="260" />
+            </div>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn primary" id="addOpenA">添加</button>
+            <button class="btn" id="applyOpenA">更新</button>
+          </div>
+          <div class="list" id="openListA"></div>
+
+          <div class="pxDivider"></div>
+
+          <!-- Items -->
+          <div class="row3">
+            <div>
+              <label>家具名称</label>
+              <input id="itemNameA" value="沙发" />
+            </div>
+            <div>
+              <label>长 <span class="mono">(cm)</span></label>
+              <input id="itemLA" type="number" value="181" min="20" />
+            </div>
+            <div>
+              <label>宽 <span class="mono">(cm)</span></label>
+              <input id="itemWA" type="number" value="85" min="20" />
+            </div>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn primary" id="addItemA">添加</button>
+            <button class="btn" id="presetA">预置</button>
+          </div>
+          <div class="list" id="itemListA"></div>
+
+          <div class="pxDivider"></div>
+
+          <!-- Avatar -->
+          <div class="row3">
+            <div>
+              <label>通行圈命名</label>
+              <input id="avatarNameA" value="彦祖" />
+            </div>
+            <div>
+              <label>直径 <span class="mono">(cm)</span></label>
+              <input id="avatarDA" type="number" value="120" min="60" max="220" />
+            </div>
+            <div>
+              <label>显示</label>
+              <select id="avatarShowA">
+                <option value="1">显示</option>
+                <option value="0">隐藏</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn primary" id="applyAvatarA">应用</button>
+            <button class="btn" id="delAvatarA">删除</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- ROOM B -->
+      <details open>
+        <summary>
+          <div class="sumLeft">
+            <div class="sumTitle">房间2</div>
+            <div class="sumMeta" id="subB">-</div>
+          </div>
+          <div class="chev">›</div>
+        </summary>
+        <div class="box">
+          <div class="row2">
+            <div>
+              <label>命名</label>
+              <input id="nameB" value="方案 B" />
+            </div>
+            <div>
+              <label>宽 <span class="mono">(cm)</span></label>
+              <input id="wB" type="number" value="700" min="100" />
+            </div>
+          </div>
+          <div class="row2" style="margin-top:8px;">
+            <div>
+              <label>长 <span class="mono">(cm)</span></label>
+              <input id="lB" type="number" value="700" min="100" />
+            </div>
+            <div style="display:flex; gap:8px; align-items:end;">
+              <button class="btn primary" id="applyB" style="width:100%;">应用</button>
+            </div>
+          </div>
+
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn" id="exportB">导出</button>
+            <button class="btn" id="removeB">隐藏</button>
+            <button class="btn" id="resetB">重置</button>
+          </div>
+
+          <div class="pxDivider"></div>
+
+          <div class="row3">
+            <div>
+              <label>门窗命名</label>
+              <input id="openNameB" value="窗" />
+            </div>
+            <div>
+              <label>类型</label>
+              <select id="openTypeB">
+                <option value="door">门</option>
+                <option value="window">窗</option>
+              </select>
+            </div>
+            <div>
+              <label>长度 <span class="mono">(cm)</span></label>
+              <input id="openLenB" type="number" value="120" min="30" max="260" />
+            </div>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn primary" id="addOpenB">添加</button>
+            <button class="btn" id="applyOpenB">更新</button>
+          </div>
+          <div class="list" id="openListB"></div>
+
+          <div class="pxDivider"></div>
+
+          <div class="row3">
+            <div>
+              <label>家具名称</label>
+              <input id="itemNameB" value="沙发" />
+            </div>
+            <div>
+              <label>长 <span class="mono">(cm)</span></label>
+              <input id="itemLB" type="number" value="181" min="20" />
+            </div>
+            <div>
+              <label>宽 <span class="mono">(cm)</span></label>
+              <input id="itemWB" type="number" value="85" min="20" />
+            </div>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn primary" id="addItemB">添加</button>
+            <button class="btn" id="presetB">预置</button>
+          </div>
+          <div class="list" id="itemListB"></div>
+
+          <div class="pxDivider"></div>
+
+          <div class="row3">
+            <div>
+              <label>通行圈命名</label>
+              <input id="avatarNameB" value="亦菲" />
+            </div>
+            <div>
+              <label>直径 <span class="mono">(cm)</span></label>
+              <input id="avatarDB" type="number" value="120" min="60" max="220" />
+            </div>
+            <div>
+              <label>显示</label>
+              <select id="avatarShowB">
+                <option value="1">显示</option>
+                <option value="0">隐藏</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn primary" id="applyAvatarB">应用</button>
+            <button class="btn" id="delAvatarB">删除</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- COMPARE -->
+      <details open>
+        <summary>
+          <div class="sumLeft">
+            <div class="sumTitle">对比</div>
+            <div class="sumMeta" id="cmpMeta">-</div>
+          </div>
+          <div class="chev">›</div>
+        </summary>
+        <div class="box">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn primary" id="genConclusion">生成</button>
+            <button class="btn" id="toggleLive">实时：关</button>
+          </div>
+          <div class="pxDivider"></div>
+          <div class="sumMeta" id="kpiText" style="white-space:normal; line-height:1.5;">
+            -
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </aside>
+
+  <!-- RIGHT -->
+  <main class="stage">
+    <div class="stageTop">
+      <div class="v" id="globalInfo">scale=0.60 · snap=14 · grid=40</div>
+    </div>
+
+    <div class="canvas" id="canvas">
+      <div class="compare" id="compare">
+        <div class="roomWrap" id="wrapA">
+          <div class="roomTag">
+            <div class="t" id="tagA">方案 A</div>
+            <div class="s" id="tagA2">700×700</div>
+          </div>
+          <div class="room" id="roomA"></div>
+        </div>
+
+        <div class="roomWrap" id="wrapB">
+          <div class="roomTag">
+            <div class="t" id="tagB">方案 B</div>
+            <div class="s" id="tagB2">700×700</div>
+          </div>
+          <div class="room" id="roomB"></div>
+        </div>
+      </div>
+    </div>
+</main>
+</div>
+
+<script>
+(() => {
+  const $ = (s)=>document.querySelector(s);
+  const $$ = (s)=>[...document.querySelectorAll(s)];
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+  const uid = ()=>crypto.randomUUID();
+
+  const g = {
+    scale: Number($("#scale").value),
+    snap: Number($("#snap").value),
+    grid: Number($("#grid").value),
+  };
+  const cm2px = (cm)=>cm*g.scale;
+
+  function syncGridCSS(){
+    document.documentElement.style.setProperty("--grid", String(g.grid));
+    $("#globalInfo").textContent = `scale=${g.scale.toFixed(2)} · snap=${g.snap} · grid=${g.grid}`;
+    $("#globalMeta").textContent = `scale=${g.scale.toFixed(2)} · snap=${g.snap} · grid=${g.grid}`;
+  }
+
+  // selection
+  let selected=null; // {room:'A'|'B', kind:'item'|'opening'|'avatar', id}
+  function clearSelection(){
+    $$(".selected").forEach(el=>el.classList.remove("selected"));
+    selected=null;
+  }
+  function setSelected(s){
+    clearSelection();
+    selected=s;
+    const el = rooms[s.room].getEl(s);
+    if(el) el.classList.add("selected");
+  }
+
+  // drag helper
+  function makeDraggable(el, opts){
+    let dragging=false, sx=0, sy=0, bl=0, bt=0;
+    el.addEventListener("pointerdown",(e)=>{
+      if(opts.isLocked?.()) return;
+      dragging=true;
+      el.setPointerCapture(e.pointerId);
+      sx=e.clientX; sy=e.clientY;
+      bl=parseFloat(el.style.left||"0");
+      bt=parseFloat(el.style.top||"0");
+      el.classList.add("dragging");
+      opts.onStart?.();
+    });
+    el.addEventListener("pointermove",(e)=>{
+      if(!dragging) return;
+      const dx=e.clientX-sx, dy=e.clientY-sy;
+      let nl=bl+dx, nt=bt+dy;
+
+      const maxL=opts.maxL(), maxT=opts.maxT();
+      const s=g.snap;
+
+      if(Math.abs(nl-0)<=s) nl=0;
+      if(Math.abs(nt-0)<=s) nt=0;
+      if(Math.abs(nl-maxL)<=s) nl=maxL;
+      if(Math.abs(nt-maxT)<=s) nt=maxT;
+
+      nl=clamp(nl,-10,maxL+10);
+      nt=clamp(nt,-10,maxT+10);
+
+      el.style.left=nl+"px";
+      el.style.top=nt+"px";
+      opts.onMove?.(nl,nt);
+    });
+
+    function end(e){
+      if(!dragging) return;
+      dragging=false;
+      try{ el.releasePointerCapture(e.pointerId);}catch{}
+      el.classList.remove("dragging");
+
+      const maxL=opts.maxL(), maxT=opts.maxT();
+      let nl=clamp(parseFloat(el.style.left||"0"),0,maxL);
+      let nt=clamp(parseFloat(el.style.top||"0"),0,maxT);
+
+      const s=g.snap;
+      if(Math.abs(nl-0)<=s) nl=0;
+      if(Math.abs(nt-0)<=s) nt=0;
+      if(Math.abs(nl-maxL)<=s) nl=maxL;
+      if(Math.abs(nt-maxT)<=s) nt=maxT;
+
+      el.style.left=nl+"px";
+      el.style.top=nt+"px";
+
+      opts.onEnd?.(nl,nt);
+      scheduleLive();
+    }
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointercancel", end);
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  function createRoom(id){
+    const elRoom = $("#room"+id);
+    const elWrap = $("#wrap"+id);
+
+    const ui = {
+      name: $("#name"+id),
+      w: $("#w"+id),
+      l: $("#l"+id),
+
+      openName: $("#openName"+id),
+      openType: $("#openType"+id),
+      openLen: $("#openLen"+id),
+
+      itemName: $("#itemName"+id),
+      itemL: $("#itemL"+id),
+      itemW: $("#itemW"+id),
+
+      avatarName: $("#avatarName"+id),
+      avatarD: $("#avatarD"+id),
+      avatarShow: $("#avatarShow"+id),
+    };
+
+    const state = {
+      id, visible:true,
+      w:Number(ui.w.value),
+      l:Number(ui.l.value),
+      name:ui.name.value,
+
+      items:[],     // {id,name,lcm,wcm,rot,el,locked}
+      openings:[],  // {id,name,type,lenCm,ori,el}
+      avatar:null,  // {id,name,dcm,el}
+      z:10
+    };
+
+    const OPEN_THICK=14;
+
+    function updateTags(){
+      $("#tag"+id).textContent = state.name;
+      $("#tag"+id+"2").textContent = `${state.w}×${state.l}`;
+
+      const sub = $("#sub"+id);
+      sub.textContent = `${state.w}×${state.l} · 门窗${state.openings.length} · 家具${state.items.length}`;
+    }
+
+    function applySize(){
+      state.name = (ui.name.value||"").trim() || (id==="A" ? "方案 A" : "方案 B");
+      state.w = Number(ui.w.value);
+      state.l = Number(ui.l.value);
+
+      elRoom.style.width  = cm2px(state.w)+"px";
+      elRoom.style.height = cm2px(state.l)+"px";
+
+      // resize items
+      state.items.forEach(it=>{
+        const wcm = it.rot ? it.lcm : it.wcm; // rot90：交换长宽
+        const lcm = it.rot ? it.wcm : it.lcm;
+        it.el.style.width  = cm2px(wcm)+"px";
+        it.el.style.height = cm2px(lcm)+"px";
+        const maxL = cm2px(state.w)-it.el.offsetWidth;
+        const maxT = cm2px(state.l)-it.el.offsetHeight;
+        it.el.style.left = clamp(parseFloat(it.el.style.left||"0"),0,maxL)+"px";
+        it.el.style.top  = clamp(parseFloat(it.el.style.top||"0"),0,maxT)+"px";
+      });
+
+      // openings
+      state.openings.forEach(o=>{
+        applyOpeningSize(o);
+        stickOpening(o);
+      });
+
+      // avatar
+      if(state.avatar){
+        const px=cm2px(state.avatar.dcm);
+        state.avatar.el.style.width=px+"px";
+        state.avatar.el.style.height=px+"px";
+        const maxL = cm2px(state.w)-state.avatar.el.offsetWidth;
+        const maxT = cm2px(state.l)-state.avatar.el.offsetHeight;
+        state.avatar.el.style.left = clamp(parseFloat(state.avatar.el.style.left||"0"),0,maxL)+"px";
+        state.avatar.el.style.top  = clamp(parseFloat(state.avatar.el.style.top||"0"),0,maxT)+"px";
+      }
+
+      updateTags();
+      renderLists();
+      updateCount();
+      scheduleLive();
+    }
+
+    function addItem(name,lcm,wcm){
+      const el=document.createElement("div");
+      el.className="item";
+      el.textContent = name || "未命名";
+      el.style.left="20px";
+      el.style.top=(20 + state.items.length*10)+"px";
+
+      const it={id:uid(), name:name||"未命名", lcm, wcm, rot:false, el, locked:false};
+      state.items.push(it);
+      elRoom.appendChild(el);
+
+      el.style.width = cm2px(wcm)+"px";
+      el.style.height= cm2px(lcm)+"px";
+
+      el.addEventListener("pointerdown", ()=>setSelected({room:id, kind:"item", id:it.id}));
+      el.addEventListener("dblclick", ()=>rotateItem(it.id));
+
+      makeDraggable(el,{
+        maxL:()=>cm2px(state.w)-el.offsetWidth,
+        maxT:()=>cm2px(state.l)-el.offsetHeight,
+        isLocked:()=>it.locked,
+        onStart:()=>{ setSelected({room:id, kind:"item", id:it.id}); el.style.zIndex=(++state.z)+""; }
+      });
+
+      renderLists(); updateTags(); updateCount(); scheduleLive();
+    }
+
+    function rotateItem(itemId){
+      const it=state.items.find(x=>x.id===itemId);
+      if(!it) return;
+      it.rot=!it.rot;                 // 只切 0/90
+      const wcm = it.rot ? it.lcm : it.wcm;
+      const lcm = it.rot ? it.wcm : it.lcm;
+
+      it.el.style.width  = cm2px(wcm)+"px";
+      it.el.style.height = cm2px(lcm)+"px";
+
+      const maxL=cm2px(state.w)-it.el.offsetWidth;
+      const maxT=cm2px(state.l)-it.el.offsetHeight;
+      it.el.style.left=clamp(parseFloat(it.el.style.left||"0"),0,maxL)+"px";
+      it.el.style.top =clamp(parseFloat(it.el.style.top||"0"),0,maxT)+"px";
+
+      renderLists(); scheduleLive();
+    }
+
+    function delItem(itemId){
+      const idx=state.items.findIndex(x=>x.id===itemId);
+      if(idx<0) return;
+      state.items[idx].el.remove();
+      state.items.splice(idx,1);
+      if(selected?.room===id && selected?.kind==="item" && selected?.id===itemId) clearSelection();
+      renderLists(); updateTags(); updateCount(); scheduleLive();
+    }
+
+    function applyOpeningSize(o){
+      const lenPx = cm2px(o.lenCm);
+      if(o.ori==="h"){
+        o.el.style.width = lenPx+"px";
+        o.el.style.height = OPEN_THICK+"px";
+      }else{
+        o.el.style.width = OPEN_THICK+"px";
+        o.el.style.height = lenPx+"px";
+      }
+      o.el.textContent = (o.name || (o.type==="door" ? "门" : "窗")).slice(0,6);
+    }
+
+    function stickOpening(o){
+      const roomW=cm2px(state.w), roomH=cm2px(state.l);
+      const x=parseFloat(o.el.style.left||"0");
+      const y=parseFloat(o.el.style.top||"0");
+      const ew=o.el.offsetWidth, eh=o.el.offsetHeight;
+
+      const dL=x;
+      const dR=Math.abs((roomW-ew)-x);
+      const dT=y;
+      const dB=Math.abs((roomH-eh)-y);
+      const m=Math.min(dL,dR,dT,dB);
+
+      if(m===dT || m===dB){
+        o.ori="h";
+        applyOpeningSize(o);
+        const newH=o.el.offsetHeight, newW=o.el.offsetWidth;
+        o.el.style.top = (m===dT ? 0 : roomH-newH)+"px";
+        o.el.style.left= clamp(x,0,roomW-newW)+"px";
+      }else{
+        o.ori="v";
+        applyOpeningSize(o);
+        const newH=o.el.offsetHeight, newW=o.el.offsetWidth;
+        o.el.style.left= (m===dL ? 0 : roomW-newW)+"px";
+        o.el.style.top = clamp(y,0,roomH-newH)+"px";
+      }
+    }
+
+    function addOpening(name,type,lenCm){
+      const el=document.createElement("div");
+      el.className="opening";
+      el.style.left="10px";
+      el.style.top="10px";
+
+      const o={id:uid(), name:(name||"").trim(), type, lenCm, ori:"h", el};
+      state.openings.push(o);
+      elRoom.appendChild(el);
+
+      applyOpeningSize(o);
+      stickOpening(o);
+
+      el.addEventListener("pointerdown", ()=>setSelected({room:id, kind:"opening", id:o.id}));
+      makeDraggable(el,{
+        maxL:()=>cm2px(state.w)-el.offsetWidth,
+        maxT:()=>cm2px(state.l)-el.offsetHeight,
+        onStart:()=>{ setSelected({room:id, kind:"opening", id:o.id}); el.style.zIndex=(++state.z)+""; },
+        onEnd:()=>{ stickOpening(o); }
+      });
+
+      renderLists(); updateTags(); updateCount(); scheduleLive();
+    }
+
+    function applyOpeningToSelected(){
+      if(!selected || selected.room!==id || selected.kind!=="opening") return;
+      const o=state.openings.find(x=>x.id===selected.id);
+      if(!o) return;
+      o.name = (ui.openName.value||"").trim();
+      o.type = ui.openType.value;
+      o.lenCm= Number(ui.openLen.value);
+      applyOpeningSize(o);
+      stickOpening(o);
+      renderLists(); scheduleLive();
+    }
+
+    function delOpening(openId){
+      const idx=state.openings.findIndex(x=>x.id===openId);
+      if(idx<0) return;
+      state.openings[idx].el.remove();
+      state.openings.splice(idx,1);
+      if(selected?.room===id && selected?.kind==="opening" && selected?.id===openId) clearSelection();
+      renderLists(); updateTags(); updateCount(); scheduleLive();
+    }
+
+    function ensureAvatar(){
+      if(state.avatar) return;
+      const el=document.createElement("div");
+      el.className="avatar";
+      el.style.left="18px";
+      el.style.top="60px";
+      elRoom.appendChild(el);
+
+      state.avatar={id:uid(), name:(ui.avatarName.value||"").trim()||"彦祖", dcm:Number(ui.avatarD.value), el};
+
+      el.addEventListener("pointerdown", ()=>setSelected({room:id, kind:"avatar", id:state.avatar.id}));
+      makeDraggable(el,{
+        maxL:()=>cm2px(state.w)-el.offsetWidth,
+        maxT:()=>cm2px(state.l)-el.offsetHeight,
+        onStart:()=>{ setSelected({room:id, kind:"avatar", id:state.avatar.id}); el.style.zIndex=(++state.z)+""; }
+      });
+
+      applyAvatar();
+    }
+
+    function applyAvatar(){
+      ensureAvatar();
+      state.avatar.name = (ui.avatarName.value||"").trim() || "彦祖";
+      state.avatar.dcm  = Number(ui.avatarD.value);
+
+      const px = cm2px(state.avatar.dcm);
+      state.avatar.el.style.width = px+"px";
+      state.avatar.el.style.height= px+"px";
+      state.avatar.el.textContent = state.avatar.name.slice(0,6);
+
+      const show = ui.avatarShow.value==="1";
+      state.avatar.el.style.display = show ? "flex" : "none";
+
+      const maxL=cm2px(state.w)-state.avatar.el.offsetWidth;
+      const maxT=cm2px(state.l)-state.avatar.el.offsetHeight;
+      state.avatar.el.style.left=clamp(parseFloat(state.avatar.el.style.left||"0"),0,maxL)+"px";
+      state.avatar.el.style.top =clamp(parseFloat(state.avatar.el.style.top||"0"),0,maxT)+"px";
+      scheduleLive();
+    }
+
+    function delAvatar(){
+      if(!state.avatar) return;
+      state.avatar.el.remove();
+      if(selected?.room===id && selected?.kind==="avatar") clearSelection();
+      state.avatar=null;
+      scheduleLive();
+    }
+
+    function resetRoom(){
+      state.items.forEach(it=>it.el.remove());
+      state.openings.forEach(o=>o.el.remove());
+      if(state.avatar) state.avatar.el.remove();
+      state.items=[]; state.openings=[]; state.avatar=null;
+      if(selected?.room===id) clearSelection();
+      renderLists(); updateTags(); updateCount(); scheduleLive();
+    }
+
+    function renderLists(){
+      const listO = $("#openList"+id);
+      listO.innerHTML="";
+      state.openings.forEach((o)=>{
+        const li=document.createElement("div");
+        li.className="li";
+        li.innerHTML = `
+          <div style="min-width:0">
+            <div class="name">${escapeHtml(o.name || (o.type==="door"?"门":"窗"))}</div>
+            <div class="meta">${o.type} · ${o.lenCm}cm</div>
+          </div>
+          <div class="ops">
+            <button class="mini">选</button>
+            <button class="mini">删</button>
+          </div>
+        `;
+        const [bSel,bDel]=li.querySelectorAll(".mini");
+        bSel.onclick=()=>setSelected({room:id, kind:"opening", id:o.id});
+        bDel.onclick=()=>delOpening(o.id);
+        listO.appendChild(li);
+      });
+
+      const listI = $("#itemList"+id);
+      listI.innerHTML="";
+      state.items.forEach((it)=>{
+        const li=document.createElement("div");
+        li.className="li";
+        li.innerHTML=`
+          <div style="min-width:0">
+            <div class="name">${escapeHtml(it.name)}</div>
+            <div class="meta">${it.lcm}×${it.wcm}cm · ${it.rot ? "r90" : "r0"}</div>
+          </div>
+          <div class="ops">
+            <button class="mini">${it.locked ? "解" : "锁"}</button>
+            <button class="mini">转</button>
+            <button class="mini">删</button>
+          </div>
+        `;
+        const [bLock,bRot,bDel]=li.querySelectorAll(".mini");
+        bLock.onclick=()=>{ it.locked=!it.locked; it.el.style.cursor=it.locked?"default":"grab"; renderLists(); };
+        bRot.onclick=()=>{ setSelected({room:id, kind:"item", id:it.id}); rotateItem(it.id); };
+        bDel.onclick=()=>delItem(it.id);
+        listI.appendChild(li);
+      });
+
+      updateTags();
+    }
+
+    function getEl(sel){
+      if(sel.kind==="item") return state.items.find(x=>x.id===sel.id)?.el;
+      if(sel.kind==="opening") return state.openings.find(x=>x.id===sel.id)?.el;
+      if(sel.kind==="avatar") return state.avatar?.el;
+      return null;
+    }
+
+    function setVisible(v){
+      state.visible=v;
+      elWrap.classList.toggle("hidden", !v);
+      if(!v && selected?.room===id) clearSelection();
+      updateCount();
+      scheduleLive();
+    }
+
+    function renderToCanvas(scaleFactor=2){
+      const margin = 24*scaleFactor;
+      const titleH = 36*scaleFactor;
+      const rw = Math.round(cm2px(state.w)*scaleFactor);
+      const rh = Math.round(cm2px(state.l)*scaleFactor);
+
+      const c=document.createElement("canvas");
+      c.width = rw + margin*2;
+      c.height= rh + margin*2 + titleH;
+      const ctx=c.getContext("2d");
+
+      // bg
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-bg").trim();
+      ctx.fillRect(0,0,c.width,c.height);
+
+      // title
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-ink").trim();
+      ctx.font = `${14*scaleFactor}px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.textBaseline="middle";
+      ctx.fillText(`${state.name} · ${state.w}×${state.l}cm`, margin, margin + titleH/2);
+
+      const rx=margin, ry=margin+titleH;
+
+      // room outline
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-muted").trim();
+      ctx.lineWidth = 2*scaleFactor;
+      ctx.strokeRect(rx, ry, rw, rh);
+
+      // openings (filled)
+      state.openings.forEach(o=>{
+        const x=rx + Math.round(parseFloat(o.el.style.left||"0")*scaleFactor);
+        const y=ry + Math.round(parseFloat(o.el.style.top||"0")*scaleFactor);
+        const w=Math.round(o.el.offsetWidth*scaleFactor);
+        const h=Math.round(o.el.offsetHeight*scaleFactor);
+
+        ctx.fillStyle = "rgba(136,136,136,0.12)";
+        ctx.fillRect(x,y,w,h);
+
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-muted").trim();
+        ctx.lineWidth = 2*scaleFactor;
+        ctx.strokeRect(x,y,w,h);
+
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-ink").trim();
+        ctx.font = `${12*scaleFactor}px ${getComputedStyle(document.body).fontFamily}`;
+        ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText((o.name || (o.type==="door"?"门":"窗")).slice(0,6), x+w/2, y+h/2);
+      });
+
+      // items (filled)
+      state.items.forEach(it=>{
+        const x=rx + Math.round(parseFloat(it.el.style.left||"0")*scaleFactor);
+        const y=ry + Math.round(parseFloat(it.el.style.top||"0")*scaleFactor);
+        const w=Math.round(it.el.offsetWidth*scaleFactor);
+        const h=Math.round(it.el.offsetHeight*scaleFactor);
+
+        ctx.fillStyle = "rgba(212,168,83,0.18)";
+        ctx.fillRect(x,y,w,h);
+
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-ink").trim();
+        ctx.lineWidth = 2*scaleFactor;
+        ctx.strokeRect(x,y,w,h);
+
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-ink").trim();
+        ctx.font = `${12*scaleFactor}px ${getComputedStyle(document.body).fontFamily}`;
+        ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText(it.name.slice(0,8), x+w/2, y+h/2);
+      });
+
+      // avatar (filled)
+      if(state.avatar && state.avatar.el.style.display!=="none"){
+        const x=rx + Math.round(parseFloat(state.avatar.el.style.left||"0")*scaleFactor);
+        const y=ry + Math.round(parseFloat(state.avatar.el.style.top||"0")*scaleFactor);
+        const w=Math.round(state.avatar.el.offsetWidth*scaleFactor);
+        const h=Math.round(state.avatar.el.offsetHeight*scaleFactor);
+
+        ctx.fillStyle = "rgba(212,168,83,0.08)";
+        ctx.beginPath();
+        ctx.ellipse(x+w/2, y+h/2, w/2, h/2, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-primary").trim();
+        ctx.lineWidth = 3*scaleFactor;
+        ctx.beginPath();
+        ctx.ellipse(x+w/2, y+h/2, w/2, h/2, 0, 0, Math.PI*2);
+        ctx.stroke();
+
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-ink").trim();
+        ctx.font = `${12*scaleFactor}px ${getComputedStyle(document.body).fontFamily}`;
+        ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText((state.avatar.name||"").slice(0,6), x+w/2, y+h/2);
+      }
+
+      // signature
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-muted").trim();
+      ctx.font = `${12*scaleFactor}px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.textAlign="right"; ctx.textBaseline="bottom";
+return c;
+    }
+
+    function exportPNG(){
+      const c = renderToCanvas(2);
+      const a=document.createElement("a");
+      a.download = `${state.name || ("房间"+id)}.png`;
+      a.href = c.toDataURL("image/png");
+      a.click();
+    }
+
+    function getRects(){
+      const rects = state.items.map(it=>({
+        x: parseFloat(it.el.style.left||"0"),
+        y: parseFloat(it.el.style.top||"0"),
+        w: it.el.offsetWidth,
+        h: it.el.offsetHeight
+      }));
+      const av = (state.avatar && state.avatar.el.style.display!=="none") ? ({
+        x: parseFloat(state.avatar.el.style.left||"0"),
+        y: parseFloat(state.avatar.el.style.top||"0"),
+        w: state.avatar.el.offsetWidth,
+        h: state.avatar.el.offsetHeight
+      }) : null;
+      return {rects, av};
+    }
+
+    return {
+      id, ui, state,
+      applySize, addItem, rotateItem, delItem,
+      addOpening, applyOpeningToSelected, delOpening,
+      ensureAvatar, applyAvatar, delAvatar,
+      resetRoom, setVisible, exportPNG,
+      renderToCanvas, getRects, getEl
+    };
+  }
+
+  const rooms = { A:createRoom("A"), B:createRoom("B") };
+
+  function updateCount(){
+    const total =
+      (rooms.A.state.visible ? rooms.A.state.items.length + rooms.A.state.openings.length + (rooms.A.state.avatar?1:0) : 0) +
+      (rooms.B.state.visible ? rooms.B.state.items.length + rooms.B.state.openings.length + (rooms.B.state.avatar?1:0) : 0);
+    $("#countPill").textContent = `${total}`;
+  }
+
+  // global apply
+  $("#applyGlobal").onclick=()=>{
+    g.scale=Number($("#scale").value);
+    g.snap =Number($("#snap").value);
+    g.grid =Number($("#grid").value);
+    syncGridCSS();
+    rooms.A.applySize();
+    rooms.B.applySize();
+  };
+
+  // fit scale
+  $("#fitScale").onclick=()=>{
+    const canvas = $("#canvas").getBoundingClientRect();
+    const pad=90;
+    const availW=Math.max(240, canvas.width - pad);
+    const availH=Math.max(240, canvas.height - pad);
+
+    const vis=[rooms.A, rooms.B].filter(r=>r.state.visible);
+    if(vis.length===0) return;
+
+    const gap = (vis.length===2) ? 18 : 0;
+    const totalWcm = vis.reduce((s,r)=>s+r.state.w,0);
+    const maxLcm = vis.reduce((m,r)=>Math.max(m,r.state.l),0);
+
+    const scaleByW = availW / (totalWcm + gap / Math.max(0.001, g.scale));
+    const scaleByH = availH / maxLcm;
+    let next = Math.min(scaleByW, scaleByH);
+    next = Math.max(0.2, Math.min(1.6, next));
+    next = Math.round(next / 0.05)*0.05;
+
+    g.scale = next;
+    $("#scale").value = next.toFixed(2);
+    syncGridCSS();
+    rooms.A.applySize();
+    rooms.B.applySize();
+  };
+
+  // A
+  $("#applyA").onclick=()=>rooms.A.applySize();
+  $("#exportA").onclick=()=>rooms.A.exportPNG();
+  $("#resetA").onclick=()=>rooms.A.resetRoom();
+  $("#removeA").onclick=()=>rooms.A.setVisible(false);
+
+  $("#addOpenA").onclick=()=>rooms.A.addOpening($("#openNameA").value, $("#openTypeA").value, Number($("#openLenA").value));
+  $("#applyOpenA").onclick=()=>rooms.A.applyOpeningToSelected();
+
+  $("#addItemA").onclick=()=>rooms.A.addItem($("#itemNameA").value.trim()||"未命名", Number($("#itemLA").value), Number($("#itemWA").value));
+  $("#presetA").onclick=()=>{
+    rooms.A.addItem("床",200,150);
+    rooms.A.addItem("冰箱",170,60);
+    rooms.A.addItem("衣柜",200,60);
+    rooms.A.addItem("沙发",181,85);
+  };
+
+  $("#applyAvatarA").onclick=()=>rooms.A.applyAvatar();
+  $("#delAvatarA").onclick=()=>rooms.A.delAvatar();
+
+  // B
+  $("#applyB").onclick=()=>rooms.B.applySize();
+  $("#exportB").onclick=()=>rooms.B.exportPNG();
+  $("#resetB").onclick=()=>rooms.B.resetRoom();
+  $("#removeB").onclick=()=>rooms.B.setVisible(false);
+
+  $("#addOpenB").onclick=()=>rooms.B.addOpening($("#openNameB").value, $("#openTypeB").value, Number($("#openLenB").value));
+  $("#applyOpenB").onclick=()=>rooms.B.applyOpeningToSelected();
+
+  $("#addItemB").onclick=()=>rooms.B.addItem($("#itemNameB").value.trim()||"未命名", Number($("#itemLB").value), Number($("#itemWB").value));
+  $("#presetB").onclick=()=>{
+    rooms.B.addItem("床",200,150);
+    rooms.B.addItem("冰箱",170,60);
+    rooms.B.addItem("衣柜",200,60);
+    rooms.B.addItem("沙发",181,85);
+  };
+
+  $("#applyAvatarB").onclick=()=>rooms.B.applyAvatar();
+  $("#delAvatarB").onclick=()=>rooms.B.delAvatar();
+
+  // restore
+  $("#restoreRooms").onclick=()=>{
+    rooms.A.setVisible(true);
+    rooms.B.setVisible(true);
+    rooms.A.applySize();
+    rooms.B.applySize();
+  };
+
+  // Export compare
+  $("#exportCompare").onclick=()=>{
+    const vis=[rooms.A, rooms.B].filter(r=>r.state.visible);
+    if(vis.length===0) return;
+
+    if(vis.length===1){
+      const c = vis[0].renderToCanvas(2);
+      const a=document.createElement("a");
+      a.download = `导出-${vis[0].state.name}.png`;
+      a.href = c.toDataURL("image/png");
+      a.click();
+      return;
+    }
+
+    const cA=rooms.A.renderToCanvas(2);
+    const cB=rooms.B.renderToCanvas(2);
+    const gap=24;
+
+    const c=document.createElement("canvas");
+    c.width = cA.width + gap + cB.width;
+    c.height= Math.max(cA.height, cB.height);
+    const ctx=c.getContext("2d");
+
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--c-bg").trim();
+    ctx.fillRect(0,0,c.width,c.height);
+    ctx.drawImage(cA,0,0);
+    ctx.drawImage(cB,cA.width+gap,0);
+
+    const a=document.createElement("a");
+    a.download = `对比-${rooms.A.state.name}-vs-${rooms.B.state.name}.png`;
+    a.href = c.toDataURL("image/png");
+    a.click();
+  };
+
+  // canvas blank click clears selection
+  $("#canvas").addEventListener("pointerdown",(e)=>{
+    if(e.target.id==="canvas") clearSelection();
+  });
+
+  // keyboard shortcuts (保留，但不在 UI 里写出来)
+  document.addEventListener("keydown",(e)=>{
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    if(tag==="input" || tag==="textarea" || tag==="select") return;
+
+    if(e.key.toLowerCase()==="r"){
+      if(selected?.kind==="item"){
+        rooms[selected.room].rotateItem(selected.id);
+      }
+    }
+    if(e.key==="Delete" || e.key==="Backspace"){
+      if(!selected) return;
+      const room=rooms[selected.room];
+      if(selected.kind==="item") room.delItem(selected.id);
+      if(selected.kind==="opening") room.delOpening(selected.id);
+      if(selected.kind==="avatar") room.delAvatar();
+    }
+    if(e.key==="Escape"){
+      clearSelection();
+    }
+  });
+
+  // ===== 对比结论 =====
+  function rectIntersect(a,b){
+    return !(a.x+a.w<=b.x || b.x+b.w<=a.x || a.y+a.h<=b.y || b.y+b.h<=a.y);
+  }
+  function compute(room){
+    if(!room.state.visible) return null;
+    const area = room.state.w * room.state.l;
+    const furn = room.state.items.reduce((s,it)=>s+(it.lcm*it.wcm),0);
+    const density = area>0 ? furn/area : 0;
+
+    const {rects,av} = room.getRects();
+    let overlap=0;
+    for(let i=0;i<rects.length;i++){
+      for(let j=i+1;j<rects.length;j++){
+        if(rectIntersect(rects[i],rects[j])) overlap++;
+      }
+    }
+    let block=0;
+    if(av){
+      rects.forEach(r=>{ if(rectIntersect(r,av)) block++; });
+    }
+    const score = (1-density)*100 - overlap*18 - block*12;
+    return { name: room.state.name, density, overlap, block, score };
+  }
+
+  let live=false, liveTimer=null;
+  function renderConclusion(){
+    const a=compute(rooms.A);
+    const b=compute(rooms.B);
+
+    if(!a && !b){
+      $("#kpiText").textContent = "-";
+      $("#cmpMeta").textContent = "-";
+      return;
+    }
+    if(a && !b){
+      $("#kpiText").textContent =
+        `房间1：密度 ${Math.round(a.density*100)}% · 重叠 ${a.overlap} · 阻挡 ${a.block}`;
+      $("#cmpMeta").textContent = "单房间";
+      return;
+    }
+    if(!a && b){
+      $("#kpiText").textContent =
+        `房间2：密度 ${Math.round(b.density*100)}% · 重叠 ${b.overlap} · 阻挡 ${b.block}`;
+      $("#cmpMeta").textContent = "单房间";
+      return;
+    }
+
+    const win = (a.score>=b.score) ? a : b;
+    const lose= (win===a) ? b : a;
+
+    $("#kpiText").textContent =
+      `推荐：${win.name} · ` +
+      `${win.name}（密度${Math.round(win.density*100)}% 重叠${win.overlap} 阻挡${win.block}） · ` +
+      `${lose.name}（密度${Math.round(lose.density*100)}% 重叠${lose.overlap} 阻挡${lose.block}）`;
+
+    $("#cmpMeta").textContent = "已生成";
+  }
+  function scheduleLive(){
+    if(!live) return;
+    clearTimeout(liveTimer);
+    liveTimer=setTimeout(renderConclusion,120);
+  }
+
+  $("#genConclusion").onclick=renderConclusion;
+  $("#toggleLive").onclick=()=>{
+    live=!live;
+    $("#toggleLive").textContent = `实时：${live?"开":"关"}`;
+    if(live) renderConclusion();
+  };
+
+  // init
+  $$("aside.panel details").forEach(d => d.open = false);
+  
+  syncGridCSS();
+
+  rooms.A.ensureAvatar(); rooms.B.ensureAvatar();
+  rooms.A.applyAvatar(); rooms.B.applyAvatar();
+
+  rooms.A.addOpening("入户门","door",90);
+  rooms.B.addOpening("窗","window",120);
+
+  rooms.A.applySize();
+  rooms.B.applySize();
+
+  updateCount();
+})();
+</script>
+
+<div class="brandText">DACHE STUDIO</div>
+
+</body>
+</html>
