@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
   <title>成功人士都在用的出租屋模拟器</title>
 
   <style>
@@ -38,12 +41,13 @@
       margin:0;
       background:var(--c-bg);
       color:var(--c-ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", Segoe UI, Roboto, Helvetica, Arial;
+      font-family: "Noto Serif SC", "Source Han Serif SC", "思源宋体", "SimSun", "STSong", Georgia, serif;
+      font-weight: 700;
     }
 
     .app{
       display:grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: 360px 1fr;
       gap:12px;
       padding:12px;
       height:100%;
@@ -69,18 +73,18 @@
     }
     .brand h1{
       margin:0;
-      font-size:16px;
+      font-size:17px;
       font-weight:900;
       line-height:1.25;
       letter-spacing:.2px;
     }
     .pill{
       font-family:var(--mono);
-      font-size:12px;
+      font-size:14px;
       font-weight:800;
       border:var(--line);
       border-radius:var(--r);
-      padding:6px 8px;
+      padding:4px 7px;
       white-space:nowrap;
     }
 
@@ -94,10 +98,10 @@
     .btn{
       border:var(--line);
       border-radius:var(--r);
-      padding:8px 10px;
+      padding:8px 11px;
       background:transparent;
       color:var(--c-ink);
-      font-size:12px;
+      font-size:14px;
       font-weight:900;
       cursor:pointer;
       line-height:1;
@@ -137,7 +141,7 @@
       gap:8px;
     }
     .sumTitle{
-      font-size:14px;
+      font-size:16px;
       font-weight:900;
       white-space:nowrap;
     }
@@ -187,26 +191,28 @@
 
     label{
       display:block;
-      font-size:11px;
+      font-size:12px;
       font-weight:800;
       color:var(--c-muted);
-      margin-bottom:6px;
+      margin-bottom:4px;
     }
 
     input, select{
       width:100%;
       border:var(--line);
       border-radius:var(--r);
-      padding:8px 10px;
+      padding:4px 6px;
       background:transparent;
       color:var(--c-ink);
-      font-size:14px;
+      font-size:13px;
       outline:none;
     }
     input:focus, select:focus{ box-shadow: 0 0 0 2px var(--c-primary); }
 
     .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
     .row3{ display:grid; grid-template-columns: 1.2fr 1fr 1fr; gap:8px; }
+    .row4{ display:grid; grid-template-columns: 1.2fr 0.9fr 0.9fr auto; gap:5px; align-items:end; }
+    .row-inline{ display:flex; gap:8px; flex-wrap:wrap; }
 
     .list{
       display:flex;
@@ -229,7 +235,7 @@
       text-overflow:ellipsis;
       white-space:nowrap;
       font-weight:900;
-      font-size:12px;
+      font-size:13px;
     }
     .li .meta{
       font-family:var(--mono);
@@ -243,7 +249,7 @@
       border:var(--line);
       border-radius:var(--r);
       padding:6px 8px;
-      font-size:12px;
+      font-size:15px;
       font-weight:900;
       cursor:pointer;
       background:transparent;
@@ -273,7 +279,7 @@
     }
     .stageTop .v{
       font-family:var(--mono);
-      font-size:12px;
+      font-size:13px;
       font-weight:900;
       color:var(--c-ink);
     }
@@ -306,7 +312,7 @@
       border-radius:var(--r);
       padding:6px 8px;
       font-weight:900;
-      font-size:12px;
+      font-size:14px;
       background:var(--c-primary);
     }
     .roomTag .s{
@@ -315,7 +321,7 @@
       padding:6px 8px;
       font-family:var(--mono);
       font-weight:900;
-      font-size:12px;
+      font-size:14px;
       color:var(--c-muted);
     }
 
@@ -348,14 +354,14 @@
       background: rgba(136,136,136,0.12); /* 辅助色轻填充 */
       border-radius:6px;
       padding:4px 6px;
-      font-size:12px;
+      font-size:11px;
     }
     .avatar{
       border-radius:999px;
       border-color: var(--c-primary);
       background: rgba(212,168,83,0.08); /* 很淡的主色填充 */
       padding:0;
-      font-size:12px;
+      font-size:15px;
     }
 
     .item.dragging, .opening.dragging, .avatar.dragging{
@@ -382,8 +388,8 @@
   position: fixed;
   right: 20px;
   bottom: 20px;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 700;
   letter-spacing: 0.12em;
   color: #1A1A1A;
   opacity: 0.85;
@@ -408,7 +414,6 @@
     <div class="topActions">
       <button class="btn primary" id="exportCompare">导出</button>
       <button class="btn" id="fitScale">适配</button>
-      <button class="btn" id="restoreRooms">恢复</button>
     </div>
 
     <div class="acc">
@@ -437,7 +442,7 @@
               <input id="grid" type="number" step="5" min="20" max="80" value="40" />
             </div>
           </div>
-          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+          <div class="row-inline" style="margin-top:10px;">
             <button class="btn primary" id="applyGlobal">应用</button>
           </div>
         </div>
@@ -453,27 +458,25 @@
           <div class="chev">›</div>
         </summary>
         <div class="box">
-          <div class="row2">
+          <div class="row4">
             <div>
-              <label>命名</label>
+              <label>房间命名</label>
               <input id="nameA" value="方案 A" />
             </div>
             <div>
-              <label>宽 <span class="mono">(cm)</span></label>
+              <label>宽(cm)</label>
               <input id="wA" type="number" value="700" min="100" />
             </div>
-          </div>
-          <div class="row2" style="margin-top:8px;">
             <div>
-              <label>长 <span class="mono">(cm)</span></label>
+              <label>长(cm)</label>
               <input id="lA" type="number" value="700" min="100" />
             </div>
-            <div style="display:flex; gap:8px; align-items:end;">
+            <div style="display:flex; align-items:end;">
               <button class="btn primary" id="applyA" style="width:100%;">应用</button>
             </div>
           </div>
 
-          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+          <div class="row-inline" style="margin-top:10px;">
             <button class="btn" id="exportA">导出</button>
             <button class="btn" id="removeA">隐藏</button>
             <button class="btn" id="resetA">重置</button>
@@ -482,7 +485,7 @@
           <div class="pxDivider"></div>
 
           <!-- Openings -->
-          <div class="row3">
+          <div class="row4">
             <div>
               <label>门窗命名</label>
               <input id="openNameA" value="入户门" />
@@ -495,36 +498,34 @@
               </select>
             </div>
             <div>
-              <label>长度 <span class="mono">(cm)</span></label>
+              <label>长度(cm)</label>
               <input id="openLenA" type="number" value="90" min="30" max="260" />
             </div>
-          </div>
-          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn primary" id="addOpenA">添加</button>
-            <button class="btn" id="applyOpenA">更新</button>
+            <div style="display:flex; align-items:end;">
+              <button class="btn primary" id="addOpenA" style="width:100%;">应用</button>
+            </div>
           </div>
           <div class="list" id="openListA"></div>
 
           <div class="pxDivider"></div>
 
           <!-- Items -->
-          <div class="row3">
+          <div class="row4">
             <div>
-              <label>家具名称</label>
+              <label>家具命名</label>
               <input id="itemNameA" value="沙发" />
             </div>
             <div>
-              <label>长 <span class="mono">(cm)</span></label>
+              <label>长(cm)</label>
               <input id="itemLA" type="number" value="181" min="20" />
             </div>
             <div>
-              <label>宽 <span class="mono">(cm)</span></label>
+              <label>宽(cm)</label>
               <input id="itemWA" type="number" value="85" min="20" />
             </div>
-          </div>
-          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn primary" id="addItemA">添加</button>
-            <button class="btn" id="presetA">预置</button>
+            <div style="display:flex; align-items:end;">
+              <button class="btn primary" id="addItemA" style="width:100%;">应用</button>
+            </div>
           </div>
           <div class="list" id="itemListA"></div>
 
@@ -537,20 +538,12 @@
               <input id="avatarNameA" value="彦祖" />
             </div>
             <div>
-              <label>直径 <span class="mono">(cm)</span></label>
+              <label>直径(cm)</label>
               <input id="avatarDA" type="number" value="120" min="60" max="220" />
             </div>
-            <div>
-              <label>显示</label>
-              <select id="avatarShowA">
-                <option value="1">显示</option>
-                <option value="0">隐藏</option>
-              </select>
+            <div style="display:flex; align-items:end;">
+              <button class="btn primary" id="applyAvatarA" style="width:100%;">应用</button>
             </div>
-          </div>
-          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn primary" id="applyAvatarA">应用</button>
-            <button class="btn" id="delAvatarA">删除</button>
           </div>
         </div>
       </details>
@@ -565,27 +558,25 @@
           <div class="chev">›</div>
         </summary>
         <div class="box">
-          <div class="row2">
+          <div class="row4">
             <div>
-              <label>命名</label>
+              <label>房间命名</label>
               <input id="nameB" value="方案 B" />
             </div>
             <div>
-              <label>宽 <span class="mono">(cm)</span></label>
+              <label>宽(cm)</label>
               <input id="wB" type="number" value="700" min="100" />
             </div>
-          </div>
-          <div class="row2" style="margin-top:8px;">
             <div>
-              <label>长 <span class="mono">(cm)</span></label>
+              <label>长(cm)</label>
               <input id="lB" type="number" value="700" min="100" />
             </div>
-            <div style="display:flex; gap:8px; align-items:end;">
+            <div style="display:flex; align-items:end;">
               <button class="btn primary" id="applyB" style="width:100%;">应用</button>
             </div>
           </div>
 
-          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+          <div class="row-inline" style="margin-top:10px;">
             <button class="btn" id="exportB">导出</button>
             <button class="btn" id="removeB">隐藏</button>
             <button class="btn" id="resetB">重置</button>
@@ -593,7 +584,7 @@
 
           <div class="pxDivider"></div>
 
-          <div class="row3">
+          <div class="row4">
             <div>
               <label>门窗命名</label>
               <input id="openNameB" value="窗" />
@@ -606,35 +597,33 @@
               </select>
             </div>
             <div>
-              <label>长度 <span class="mono">(cm)</span></label>
+              <label>长度(cm)</label>
               <input id="openLenB" type="number" value="120" min="30" max="260" />
             </div>
-          </div>
-          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn primary" id="addOpenB">添加</button>
-            <button class="btn" id="applyOpenB">更新</button>
+            <div style="display:flex; align-items:end;">
+              <button class="btn primary" id="addOpenB" style="width:100%;">应用</button>
+            </div>
           </div>
           <div class="list" id="openListB"></div>
 
           <div class="pxDivider"></div>
 
-          <div class="row3">
+          <div class="row4">
             <div>
-              <label>家具名称</label>
+              <label>家具命名</label>
               <input id="itemNameB" value="沙发" />
             </div>
             <div>
-              <label>长 <span class="mono">(cm)</span></label>
+              <label>长(cm)</label>
               <input id="itemLB" type="number" value="181" min="20" />
             </div>
             <div>
-              <label>宽 <span class="mono">(cm)</span></label>
+              <label>宽(cm)</label>
               <input id="itemWB" type="number" value="85" min="20" />
             </div>
-          </div>
-          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn primary" id="addItemB">添加</button>
-            <button class="btn" id="presetB">预置</button>
+            <div style="display:flex; align-items:end;">
+              <button class="btn primary" id="addItemB" style="width:100%;">应用</button>
+            </div>
           </div>
           <div class="list" id="itemListB"></div>
 
@@ -646,20 +635,12 @@
               <input id="avatarNameB" value="亦菲" />
             </div>
             <div>
-              <label>直径 <span class="mono">(cm)</span></label>
+              <label>直径(cm)</label>
               <input id="avatarDB" type="number" value="120" min="60" max="220" />
             </div>
-            <div>
-              <label>显示</label>
-              <select id="avatarShowB">
-                <option value="1">显示</option>
-                <option value="0">隐藏</option>
-              </select>
+            <div style="display:flex; align-items:end;">
+              <button class="btn primary" id="applyAvatarB" style="width:100%;">应用</button>
             </div>
-          </div>
-          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn primary" id="applyAvatarB">应用</button>
-            <button class="btn" id="delAvatarB">删除</button>
           </div>
         </div>
       </details>
@@ -674,7 +655,7 @@
           <div class="chev">›</div>
         </summary>
         <div class="box">
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <div class="row-inline">
             <button class="btn primary" id="genConclusion">生成</button>
             <button class="btn" id="toggleLive">实时：关</button>
           </div>
@@ -1070,7 +1051,7 @@
       state.avatar.el.style.height= px+"px";
       state.avatar.el.textContent = state.avatar.name.slice(0,6);
 
-      const show = ui.avatarShow.value==="1";
+      const show = true; // 已移除显示/隐藏控件，始终显示
       state.avatar.el.style.display = show ? "flex" : "none";
 
       const maxL=cm2px(state.w)-state.avatar.el.offsetWidth;
@@ -1346,18 +1327,11 @@ return c;
   $("#removeA").onclick=()=>rooms.A.setVisible(false);
 
   $("#addOpenA").onclick=()=>rooms.A.addOpening($("#openNameA").value, $("#openTypeA").value, Number($("#openLenA").value));
-  $("#applyOpenA").onclick=()=>rooms.A.applyOpeningToSelected();
 
   $("#addItemA").onclick=()=>rooms.A.addItem($("#itemNameA").value.trim()||"未命名", Number($("#itemLA").value), Number($("#itemWA").value));
-  $("#presetA").onclick=()=>{
-    rooms.A.addItem("床",200,150);
-    rooms.A.addItem("冰箱",170,60);
-    rooms.A.addItem("衣柜",200,60);
-    rooms.A.addItem("沙发",181,85);
-  };
+
 
   $("#applyAvatarA").onclick=()=>rooms.A.applyAvatar();
-  $("#delAvatarA").onclick=()=>rooms.A.delAvatar();
 
   // B
   $("#applyB").onclick=()=>rooms.B.applySize();
@@ -1366,26 +1340,13 @@ return c;
   $("#removeB").onclick=()=>rooms.B.setVisible(false);
 
   $("#addOpenB").onclick=()=>rooms.B.addOpening($("#openNameB").value, $("#openTypeB").value, Number($("#openLenB").value));
-  $("#applyOpenB").onclick=()=>rooms.B.applyOpeningToSelected();
 
   $("#addItemB").onclick=()=>rooms.B.addItem($("#itemNameB").value.trim()||"未命名", Number($("#itemLB").value), Number($("#itemWB").value));
-  $("#presetB").onclick=()=>{
-    rooms.B.addItem("床",200,150);
-    rooms.B.addItem("冰箱",170,60);
-    rooms.B.addItem("衣柜",200,60);
-    rooms.B.addItem("沙发",181,85);
-  };
+
 
   $("#applyAvatarB").onclick=()=>rooms.B.applyAvatar();
-  $("#delAvatarB").onclick=()=>rooms.B.delAvatar();
 
-  // restore
-  $("#restoreRooms").onclick=()=>{
-    rooms.A.setVisible(true);
-    rooms.B.setVisible(true);
-    rooms.A.applySize();
-    rooms.B.applySize();
-  };
+
 
   // Export compare
   $("#exportCompare").onclick=()=>{
@@ -1526,9 +1487,6 @@ return c;
 
   rooms.A.ensureAvatar(); rooms.B.ensureAvatar();
   rooms.A.applyAvatar(); rooms.B.applyAvatar();
-
-  rooms.A.addOpening("入户门","door",90);
-  rooms.B.addOpening("窗","window",120);
 
   rooms.A.applySize();
   rooms.B.applySize();
